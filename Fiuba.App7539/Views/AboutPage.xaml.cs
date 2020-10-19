@@ -10,6 +10,8 @@ namespace Fiuba.App7539.Views
         public AboutPage()
         {
             InitializeComponent();
+
+            //var but = Content.FindByName<Button>("testButton");
         }
     }
 }

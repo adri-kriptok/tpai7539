@@ -1,0 +1,7 @@
+https://www.grapecity.com/blogs/how-to-use-speech-recognition-with-xamarin-android
+
+https://docs.microsoft.com/en-us/xamarin/android/platform/speech
+
+https://stackoverflow.com/questions/60095230/how-to-access-microphone-in-xamarin-emulator
+
+https://www.syncios.com/android/how-to-enable-usb-debugging-on-moto-g.html
