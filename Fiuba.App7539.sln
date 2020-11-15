@@ -15,6 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		links.txt = links.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{26B251BC-D245-4F06-ABC4-F99A2E3BF0A6}"
+	ProjectSection(SolutionItems) = preProject
+		docs\TP_DiegoCosta.pdf = docs\TP_DiegoCosta.pdf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
