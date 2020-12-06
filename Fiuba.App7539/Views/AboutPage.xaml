@@ -44,8 +44,7 @@
 
                 <Button x:Name="testButton" x:Uid="testButtonId"
                         Margin="0,10,0,0" 
-                        Text="Prueba Adri"
-                        Command="{Binding OpenWebCommand}"
+                        Text="Prueba Adri"                        
                         BackgroundColor="{StaticResource Primary}"
                         TextColor="White" />
 
