@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Media;
 using Android.OS;
 using Android.Runtime;
 using Android.Speech;
@@ -7,8 +8,12 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Fiuba7539.Droid.Base;
+using Java.Lang;
 using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
@@ -16,66 +21,126 @@ namespace Fiuba7539.Droid
 {
     /// <summary>
     /// https://stackoverflow.com/questions/19724471/speech-recognition-without-google-dialog-boxes
+    /// 
+    /// https://stackoverflow.com/questions/11951723/disable-ready-sound-of-recognition-listener
     /// </summary>
     public abstract class ActivityBase : AppCompatActivity
     {
-        private const int StartListening = 636;
-        private const int VoiceCommandResult = 10;
-
+        private bool listening = false;
         private SpeechOptions speakSettings;
-        private SpeechRecognizer mSpeechRecognizer;
+        private SpeechRecognizer speechRecognizer;
+        private AudioManager audioManager;
+        private int currentStreamVolume;
+
         //private Intent voiceIntent;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
 
-            this.mSpeechRecognizer = SpeechRecognizer.CreateSpeechRecognizer(this);
-            
-            //var mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            //var mSpeechRecognizerIntent.PutExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            //                                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            //var mSpeechRecognizerIntent.PutExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-            //                                 this.getPackageName());
+            this.audioManager = (AudioManager)GetSystemService(Context.AudioService);
+            this.speechRecognizer = SpeechRecognizer.CreateSpeechRecognizer(this);
 
+            // Guardo el volumen que tenía cuando se ejcutó la aplicación.
+            currentStreamVolume = audioManager.GetStreamVolume(Stream.Notification);
 
-            mSpeechRecognizer.Results += MSpeechRecognizer_Results;
-            mSpeechRecognizer.Error += MSpeechRecognizer_Error;
+            speechRecognizer.Results += MSpeechRecognizer_Results;
+            speechRecognizer.Error += MSpeechRecognizer_Error;
+
+            speechRecognizer.BeginningOfSpeech += MSpeechRecognizer_BeginningOfSpeech;
+            speechRecognizer.BufferReceived += MSpeechRecognizer_BufferReceived;
+            speechRecognizer.EndOfSpeech += MSpeechRecognizer_EndOfSpeech;
+            speechRecognizer.Event += MSpeechRecognizer_Event;
+            speechRecognizer.PartialResults += MSpeechRecognizer_PartialResults;
+            speechRecognizer.ReadyForSpeech += MSpeechRecognizer_ReadyForSpeech;
+            speechRecognizer.RmsChanged += MSpeechRecognizer_RmsChanged;
+
+            MuteMicSound();
+        }
+
+        private void MuteMicSound()
+        {
+            Debugger.Log(1, "DEBUG", "Mute");
+
+            UpdateMicSound();
+            // Muteo para que no se escuche el ruido molesto de que se activa el micrófono.
+            audioManager.SetStreamVolume(Stream.Notification, 0, 0);
+        }
+
+        /// <summary>
+        /// Guardo el volumen que tiene actualmente configurado el teléfono para los
+        /// sonidos de sistema.
+        /// </summary>
+        private void UpdateMicSound()
+        {               
+            currentStreamVolume = audioManager.GetStreamVolume(Stream.Notification);
+        }
+
+        private void UnmuteMic()
+        {
+            Debugger.Log(1, "DEBUG", "Unmute");
+
+            // this methods called when Speech Recognition is ready
+            // also this is the right time to un-mute system volume because the annoying sound played already
+            // again setting the system volume back to the original, un-mutting
+            audioManager.SetStreamVolume(Stream.Notification, currentStreamVolume, 0);
+        }
+
+        private void MSpeechRecognizer_ReadyForSpeech(object sender, ReadyForSpeechEventArgs e)
+        {            
+        }
+
+        private void MSpeechRecognizer_BeginningOfSpeech(object sender, EventArgs e)
+        {
+        }
+
+        private void MSpeechRecognizer_EndOfSpeech(object sender, EventArgs e)
+        {
+        }
+
+        private void MSpeechRecognizer_PartialResults(object sender, PartialResultsEventArgs e)
+        {            
+        }
+
+        private void MSpeechRecognizer_Event(object sender, EventEventArgs e)
+        {            
+        }
+
+        private void MSpeechRecognizer_BufferReceived(object sender, BufferReceivedEventArgs e)
+        {
+        }
+
+        private void MSpeechRecognizer_RmsChanged(object sender, RmsChangedEventArgs e)
+        {
         }
 
         private void MSpeechRecognizer_Error(object sender, ErrorEventArgs e)
         {
-            // await IDoNotUnderstand();
-            WaitForCommand();
+            if (e.Error == SpeechRecognizerError.NoMatch)
+            {
+                //await IDoNotUnderstandAsync();
+                WaitForCommand();                
+            }
+            else
+            {
+                Debugger.Log(1, "ERROR", $"{e.Error}");                
+            }
         }
 
         private async void MSpeechRecognizer_Results(object sender, ResultsEventArgs e)
-        {
+        {            
             var matches = e.Results.GetStringArrayList(SpeechRecognizer.ResultsRecognition);
 
-
-            //wordsList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, matches));
-            //
-            //
-            //if (matches.contains("hello") {
-            //
-            //    Toast.makeText(getBaseContext(), "Recognision OK!!!", Toast.LENGTH_SHORT).show();
-            //
-            //}
-
-
-            //var matches = voiceIntent.GetStringArrayListExtra(RecognizerIntent.ExtraResults);
-            ////var matches = e.Results;
             if (matches.Count != 0)
             {
-                await ProcessCommand(matches.First());
+                await ProcessCommand(matches.First().ToLower().Trim());
                 //string textInput = mFilterText.Text + matches[0];
-            
+
                 //mFilterText.Text = textInput;
             }
             else
             {
-                await IDoNotUnderstand();
+                await IDoNotUnderstandAsync();
                 // mFilterText.Text = "Nothing was recognized";
             }
         }
@@ -105,234 +170,165 @@ namespace Fiuba7539.Droid
         }
 
         protected async Task Speak(string message, Action afterFinished)
-        {
+        {            
+            Debugger.Log(1, "DEBUG", message);
+            StopRecognition();
+
+            //UnmuteMic();
             await TextToSpeech.SpeakAsync(message, speakSettings).ContinueWith(t =>
             {
+                //MuteMicSound();
                 afterFinished();
+            });
+            
+        }
+
+        private void StopRecognition()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {                                 
+                if (listening)
+                {
+                    Debugger.Log(1, "DEBUG", "Cancel");
+                    speechRecognizer.Cancel();
+                    listening = false;
+                }
             });
         }
 
         protected void WaitForCommand()
         {
-            
-            //this.SetResult(Result.Ok); 
             MainThread.BeginInvokeOnMainThread(() =>
             {
+                StopRecognition();
 
-                // create the voice intent  
-                var voiceIntent = new Intent(RecognizerIntent.ActionRecognizeSpeech);
-                voiceIntent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
+                if (!listening)
+                {
+                    //
+                    //if (voiceIntent == null)
+                    //{
+                    // create the voice intent  
+                    var intent = new Intent(RecognizerIntent.ActionRecognizeSpeech);
+                    intent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
 
-                //// message and modal dialog  
-                //voiceIntent.PutExtra(RecognizerIntent.ExtraPrompt, "Esperando");
+                    // end capturing speech if there is 3 seconds of silence  
+                    intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 3000);
+                    intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 3000);
+                    intent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 30000);
+                    intent.PutExtra(RecognizerIntent.ExtraMaxResults, 1);
 
-                // end capturing speech if there is 3 seconds of silence  
-                voiceIntent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 6000);
-                voiceIntent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 60000);
-                voiceIntent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 30000);
-                voiceIntent.PutExtra(RecognizerIntent.ExtraMaxResults, 1);
+                    //intent.PutExtra(RecognizerIntent.ExtraPreferOffline, true);
 
-                // method to specify other languages to be recognised here if desired  
-                voiceIntent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
-                //StartActivityForResult(voiceIntent, VoiceCommandResult);
+                    // method to specify other languages to be recognised here if desired  
+                    intent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
+                    //}
 
-                // mSpeechRecognizer.SetRecognitionListener(this);
-                //mSpeechRecognizer.StartListening(voiceIntent);
+                    Debugger.Log(1, "DEBUG", "StartListening");
 
-                // Code to run on the main thread
-                mSpeechRecognizer.StartListening(voiceIntent);
+                    //// Doble check.
+                    //if (!listening)
+                    //{
+                    // Code to run on the main thread
+                    listening = true;
+
+                    speechRecognizer.StartListening(intent);
+                    //}
+                }
             });
-
-            //// create the voice intent  
-            //var voiceIntent = new Intent(RecognizerIntent.ActionRecognizeSpeech);
-            //voiceIntent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
-
-            ////// message and modal dialog  
-            ////voiceIntent.PutExtra(RecognizerIntent.ExtraPrompt, "Esperando");
-
-            //// end capturing speech if there is 3 seconds of silence  
-            //voiceIntent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 999993000);
-            //voiceIntent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 999993000);
-            //voiceIntent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 30000);
-            //voiceIntent.PutExtra(RecognizerIntent.ExtraMaxResults, 1);
-
-            //// method to specify other languages to be recognised here if desired  
-            //voiceIntent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
-            //StartActivityForResult(voiceIntent, VoiceCommandResult);
         }
 
         //public async override void OnUserInteraction()
         //{
         //    base.OnUserInteraction();
-
         //}
 
 
-        protected async override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        //protected async override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        //{
+        //    if (requestCode == StartListening)
+        //    {
+
+        //    }
+        //    else if (requestCode == VoiceCommandResult)
+        //    {
+        //        if (resultCode == Result.Ok)
+        //        {
+        //            var matches = data.GetStringArrayListExtra(RecognizerIntent.ExtraResults);
+        //            if (matches.Count != 0)
+        //            {
+        //                await ProcessCommand(matches.First());
+        //                //string textInput = mFilterText.Text + matches[0];
+
+        //                //mFilterText.Text = textInput;
+        //            }
+        //            else
+        //            {
+        //                await IDoNotUnderstand();
+        //                // mFilterText.Text = "Nothing was recognized";
+        //            }
+        //        }
+        //    }
+
+        //    base.OnActivityResult(requestCode, resultCode, data);
+
+        //    // if (requestCode == VOICE)
+        //    // {
+        //    //     if (resultVal == Result.Ok)
+        //    //     {
+        //    //         var matches = data.GetStringArrayListExtra(RecognizerIntent.ExtraResults);
+        //    //         if (matches.Count != 0)
+        //    //         {
+        //    //             string textInput = textBox.Text + matches[0];
+        //    //             textBox.Text = textInput;
+        //    //             switch (matches[0].Substring(0, 5).ToLower())
+        //    //             {
+        //    //                 case "north":
+        //    //                     MovePlayer(0);
+        //    //                     break;
+        //    //                 case "south":
+        //    //                     MovePlayer(1);
+        //    //                     break;
+        //    //             }
+        //    //         }
+        //    //         else
+        //    //         {
+        //    //             textBox.Text = "No speech was recognised";
+        //    //         }
+        //    //     }
+        //    //     base.OnActivityResult(requestCode, resultVal, data);
+        //    // }
+        //}
+
+        protected async Task IDoNotUnderstandAsync()
         {
-            if (requestCode == StartListening)
+            await Speak("No te entiendo. Inténtalo otra vez.", () =>
             {
-                
-            }
-            else if (requestCode == VoiceCommandResult)
-            {
-                if (resultCode == Result.Ok)
-                {
-                    var matches = data.GetStringArrayListExtra(RecognizerIntent.ExtraResults);
-                    if (matches.Count != 0)
-                    {
-                        await ProcessCommand(matches.First());
-                        //string textInput = mFilterText.Text + matches[0];
-
-                        //mFilterText.Text = textInput;
-                    }
-                    else
-                    {
-                        await IDoNotUnderstand();
-                        // mFilterText.Text = "Nothing was recognized";
-                    }
-                }
-            }
-
-            base.OnActivityResult(requestCode, resultCode, data);
-
-            // if (requestCode == VOICE)
-            // {
-            //     if (resultVal == Result.Ok)
-            //     {
-            //         var matches = data.GetStringArrayListExtra(RecognizerIntent.ExtraResults);
-            //         if (matches.Count != 0)
-            //         {
-            //             string textInput = textBox.Text + matches[0];
-            //             textBox.Text = textInput;
-            //             switch (matches[0].Substring(0, 5).ToLower())
-            //             {
-            //                 case "north":
-            //                     MovePlayer(0);
-            //                     break;
-            //                 case "south":
-            //                     MovePlayer(1);
-            //                     break;
-            //             }
-            //         }
-            //         else
-            //         {
-            //             textBox.Text = "No speech was recognised";
-            //         }
-            //     }
-            //     base.OnActivityResult(requestCode, resultVal, data);
-            // }
-        }
-
-        protected async Task IDoNotUnderstand()
-        {
-            await Speak("No te entiendo. Inténtalo otra vez.", () => WaitForCommand());
+                //listening = false;
+                WaitForCommand();
+            });
         }
 
         private async Task ProcessCommand(string command)
         {
-            await Speak($"Comando recibido: '{command}'", () => WaitForCommand());
+            if (command == Commands.Exit)
+            {
+                await Speak($"Hasta pronto", () =>
+                {
+                    FinishAffinity();
+                    //Finish();
+                    //JavaSystem.Exit(0);
+                });
+            }
+            else
+            {
+                await Speak($"Comando recibido: '{command}'", WaitForCommand);
+            }
         }
 
-
-
-
-
-
-
-        //public void onBeginningOfSpeech() 
-        //{
-        //}
-
-        //public void onBufferReceived(byte[] buffer)
-        //{ 
-        //}
-
-        //public void onEndOfSpeech() 
-        //{ 
-        //}
-
-        //public void onError(int error)
-        //{
-
-        //    //mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-
-        //}
-
-        //public void onEvent(int eventType, Bundle args) 
-        //{ 
-        //}
-
-
-        //public void onPartialResults(Bundle partialResults) 
-        //{ 
-        //}
-
-
-        //public void onReadyForSpeech(Bundle args)
-        //{
-
-
-        //    //Toast.makeText(getBaseContext(), "Voice recording starts", Toast.LENGTH_SHORT).show();
-
-        //}
-
-        //public void onResults(Bundle results)
-        //{
-
-        //    //ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-
-
-        //    //wordsList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, matches));
-
-
-        //    //if (matches.contains("hello") {
-
-        //    //    Toast.makeText(getBaseContext(), "Recognision OK!!!", Toast.LENGTH_SHORT).show();
-
-        //    //}
-
-        //}
-
-        //public void onRmsChanged(float rmsdB) 
-        //{ 
-        //}
-
-        //void IRecognitionListener.OnBeginningOfSpeech()
-        //{            
-        //}
-
-        //void IRecognitionListener.OnBufferReceived(byte[] buffer)
-        //{            
-        //}
-
-        //void IRecognitionListener.OnEndOfSpeech()
-        //{           
-        //}
-
-        //async void IRecognitionListener.OnError(SpeechRecognizerError error)
-        //{
-        //    WaitForCommand();
-        //}
-
-        //void IRecognitionListener.OnEvent(int eventType, Bundle @params)
-        //{            
-        //}
-
-        //void IRecognitionListener.OnPartialResults(Bundle partialResults)
-        //{            
-        //}
-
-        //void IRecognitionListener.OnReadyForSpeech(Bundle @params)
-        //{
-        //}
-
-        //void IRecognitionListener.OnResults(Bundle results)
-        //{            
-        //}
-
-        //void IRecognitionListener.OnRmsChanged(float rmsdB)
-        //{            
-        //}
+        protected override void OnDestroy()
+        {
+            UnmuteMic();
+            base.OnDestroy();
+        }
     }
 }

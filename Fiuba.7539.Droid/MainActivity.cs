@@ -7,6 +7,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Java.Lang;
 using System.Linq;
 using Xamarin.Essentials;
 
@@ -50,10 +51,21 @@ namespace Fiuba7539.Droid
         {
             base.OnPostCreate(savedInstanceState);
 
+#if DEBUG
+            await Speak("Bienvenido!", () =>
+#else
             await Speak("Bienvenido! \n\n Háblame y empecemos a hacer cosas juntos!", () =>
+#endif
             {
                 WaitForCommand();
             });
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            JavaSystem.Exit(0);
         }
     }
 }
