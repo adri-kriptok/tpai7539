@@ -1,12 +1,8 @@
 ﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Fiuba.App7539.Services;
-using Fiuba.App7539.Views;
-using Xamarin.Essentials;
-using System.Threading.Tasks;
 
-namespace Fiuba.App7539
+namespace Android2
 {
     public partial class App : Application
     {
@@ -14,13 +10,11 @@ namespace Fiuba.App7539
         {
             InitializeComponent();
 
-            DependencyService.Register<MockDataStore>();
-            MainPage = new AppShell();
+            MainPage = new MainPage();
         }
 
         protected override void OnStart()
         {
-        
         }
 
         protected override void OnSleep()

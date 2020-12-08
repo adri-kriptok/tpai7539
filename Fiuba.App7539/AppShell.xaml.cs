@@ -17,7 +17,7 @@ namespace Fiuba.App7539
 
         private async void OnMenuItemClicked(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("//LoginPage");
+            await Shell.Current.GoToAsync($"//{nameof(StartupPage)}");
         }
     }
 }

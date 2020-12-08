@@ -6,7 +6,7 @@ using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
 
-namespace Android1
+namespace Fiuba.App7539
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity, BottomNavigationView.IOnNavigationItemSelectedListener
@@ -23,14 +23,18 @@ namespace Android1
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
         }
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+
         public bool OnNavigationItemSelected(IMenuItem item)
         {
+            //textMessage.SetText("Bienvenido! \n\n Dime qué quieres hacer?", TextView.BufferType.Normal);
+
             switch (item.ItemId)
             {
                 case Resource.Id.navigation_home:

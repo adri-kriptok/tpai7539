@@ -2,11 +2,18 @@
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
+using Android.Content.Res;
 using Android.OS;
 using Android.Runtime;
 using Android.Speech;
 using Android.Views;
 using Android.Widget;
+using Java.Lang;
+using Microsoft.Extensions.DependencyInjection;
+using Shiny;
+using Shiny.Logging;
+using System.Linq;
+using Xamarin.Essentials;
 
 namespace Fiuba.App7539.Droid
 {
@@ -27,10 +34,18 @@ namespace Fiuba.App7539.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(savedInstanceState);
+            
+            //Shiny.AndroidShinyHost.Init(this.Application, new SampleStart(), services => 
+            //{
+            //    // register any platform specific stuff you need here
+            //});
+
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App());
+
+
 
             // mRecordButton = FindViewById<Button>(3);
             
@@ -77,17 +92,119 @@ namespace Fiuba.App7539.Droid
             //}
         }
 
+        public override void OnActionModeFinished(ActionMode mode)
+        {
+            base.OnActionModeFinished(mode);
+        }
+
+        public override void OnActionModeStarted(ActionMode mode)
+        {
+            base.OnActionModeStarted(mode);
+        }
+
+        public override void OnActivityReenter(int resultCode, Intent data)
+        {
+            base.OnActivityReenter(resultCode, data);
+        }
+
+        protected override void OnApplyThemeResource(Resources.Theme theme, int resId, bool first)
+        {
+            base.OnApplyThemeResource(theme, resId, first);
+        }
+
+        public override void OnAttachedToWindow()
+        {
+            base.OnAttachedToWindow();
+        }
+
+        public override void OnAttachFragment(Android.Support.V4.App.Fragment fragment)
+        {
+            base.OnAttachFragment(fragment);
+        }
+
+        public override void OnAttachFragment(Fragment fragment)
+        {
+            base.OnAttachFragment(fragment);
+        }
+
+        public override void OnBackPressed()
+        {
+            base.OnBackPressed();
+        }
+
+        protected override void OnChildTitleChanged(Activity childActivity, ICharSequence title)
+        {
+            base.OnChildTitleChanged(childActivity, title);
+        }
+
+        public override void OnConfigurationChanged(Configuration newConfig)
+        {
+            base.OnConfigurationChanged(newConfig);
+        }
+
+
+        public override void OnContentChanged()
+        {
+            base.OnContentChanged();
+        }
+
+        public override bool OnContextItemSelected(IMenuItem item)
+        {
+            return base.OnContextItemSelected(item);
+        }
+
+        public override void OnLocalVoiceInteractionStarted()
+        {
+            base.OnLocalVoiceInteractionStarted();
+        }
+
+        public override void OnLocalVoiceInteractionStopped()
+        {
+            base.OnLocalVoiceInteractionStopped();
+        }        
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
+        }        
 
-        public override void OnUserInteraction()
+        public async override void OnUserInteraction()
         {
             base.OnUserInteraction();
 
+
+            var welcomeText = "Bienvenido!\n\nHáblame y empecemos a hacer cosas juntos!";
+
+
+            var locales = await TextToSpeech.GetLocalesAsync();
+
+#if DEBUG
+            var locs = locales.Select(l =>
+            {
+                return $"{l.Language}-{l.Country}";
+            }).OrderBy(p => p).ToArray();
+#endif
+
+            // Grab the first locale
+            var locale = locales.FirstOrDefault(l => l.Country.ToLower() == "us" && l.Language.ToLower() == "es");
+
+            var settings = new SpeechOptions()
+            {
+                Volume = .75f,
+                Pitch = 1.0f,
+                Locale = locale
+            };
+
+            await TextToSpeech.SpeakAsync(welcomeText, settings).ContinueWith(t =>
+            {
+
+            });
+
+
+
+            return;
             isRecording = !isRecording;
             if (isRecording)
             {
@@ -162,5 +279,17 @@ namespace Fiuba.App7539.Droid
             //     base.OnActivityResult(requestCode, resultVal, data);
             // }
         }        
+    }
+
+    public class SampleStart : ShinyStartup
+    {
+        public override void ConfigureServices(IServiceCollection builder)
+        {
+            // custom logging
+            Log.UseConsole();
+            Log.UseDebug();
+
+            builder.UseSpeechRecognition();
+        }
     }
 }
