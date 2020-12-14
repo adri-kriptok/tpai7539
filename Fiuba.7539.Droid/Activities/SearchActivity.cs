@@ -94,10 +94,20 @@ namespace Fiuba7539.Droid.Activities
 
             var parsed = JsonHelper.Parse<SearchProcessItemModel[]>(responseJson);
 
-            await Speak($"Encontré: {StringHelper.Join(parsed.Select(p => p.Name))}.", () =>
+            if (parsed.Length > 0)
             {
-                WaitForSelection();
-            });
+                await Speak($"Encontré: {StringHelper.Join(parsed.Select(p => p.Name))}.", () =>
+                {
+                    WaitForCommand();
+                });
+            }
+            else
+            {
+                await Speak($"No encontré procesos relacionados con: {search}. Intenta otra vez.", () =>
+                {
+                    WaitForCommand();
+                });
+            }
         }
 
         private async void WaitForSelection()
