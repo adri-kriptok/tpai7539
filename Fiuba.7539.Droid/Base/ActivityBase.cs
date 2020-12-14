@@ -8,6 +8,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Fiuba.App7539.Helpers;
 using Fiuba7539.Droid.Base;
 using Java.Lang;
 using System;
@@ -322,7 +323,7 @@ namespace Fiuba7539.Droid
                     list.Add(Commands.Exit);
 
                     //await Speak($"Los comandos que entiendo son: '{string.Join("', '", list)}'", WaitForCommand);
-                    await Speak($"Los comandos que entiendo son: {string.Join("; ", list)}.", WaitForCommand);
+                    await Speak($"Los comandos que entiendo son: {StringHelper.Join(list)}.", WaitForCommand);
                 }
                 else if (availableCommands.Contains(command))
                 {
@@ -330,9 +331,14 @@ namespace Fiuba7539.Droid
                 }
                 else
                 {
-                    await Speak($"No conozco el comando: {command}", WaitForCommand);
+                    await OnNotKnownCommand(command);
                 }
             }
+        }
+
+        protected virtual async Task OnNotKnownCommand(string command)
+        {
+            await Speak($"No conozco el comando: {command}", WaitForCommand);
         }
 
         protected abstract void ExecuteCommand(string command);

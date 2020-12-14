@@ -29,7 +29,7 @@ namespace Fiuba.App7539.ViewModels
         public string ItemId
         {
             get
-            {
+            {                 
                 return itemId;
             }
             set

@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{26B251BC-D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fiuba.7539.Droid", "Fiuba.7539.Droid\Fiuba.7539.Droid.csproj", "{D90CD958-F23B-4D2C-9EB5-955FD0387E6F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fiuba.App7539", "Fiuba.App7539\Fiuba.App7539.csproj", "{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,18 @@ Global
 		{D90CD958-F23B-4D2C-9EB5-955FD0387E6F}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{D90CD958-F23B-4D2C-9EB5-955FD0387E6F}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{D90CD958-F23B-4D2C-9EB5-955FD0387E6F}.Release|iPhoneSimulator.Deploy.0 = Release|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Release|iPhone.Build.0 = Release|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{9ED8E765-01D7-4E44-BE97-7AEEDB66B500}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
