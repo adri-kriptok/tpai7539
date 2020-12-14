@@ -23,7 +23,7 @@ using Xamarin.Essentials;
 
 namespace Fiuba7539.Droid.Activities
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
     public class SearchActivity : ActivityBase, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         TextView textMessage;
@@ -32,7 +32,7 @@ namespace Fiuba7539.Droid.Activities
         {
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
-            SetContentView(Resource.Layout.activity_main);
+            SetContentView(Resource.Layout.activity_search);
 
             textMessage = FindViewById<TextView>(Resource.Id.message);
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
