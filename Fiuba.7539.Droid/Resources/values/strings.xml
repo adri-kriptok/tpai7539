@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Fiuba 7539 - 2020 - Opción 1</string>
     <string name="title_home">Bienvenido!! \n\n Dime qué quieres hacer!</string>
+    <string name="title_search">Buscador de Procesos</string>
 </resources>

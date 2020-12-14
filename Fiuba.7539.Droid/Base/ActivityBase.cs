@@ -11,6 +11,7 @@ using Android.Widget;
 using Fiuba7539.Droid.Base;
 using Java.Lang;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -204,9 +205,6 @@ namespace Fiuba7539.Droid
 
                 if (!listening)
                 {
-                    //
-                    //if (voiceIntent == null)
-                    //{
                     // create the voice intent  
                     var intent = new Intent(RecognizerIntent.ActionRecognizeSpeech);
                     intent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
@@ -221,18 +219,12 @@ namespace Fiuba7539.Droid
 
                     // method to specify other languages to be recognised here if desired  
                     intent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
-                    //}
 
                     Debugger.Log(1, "DEBUG", "StartListening");
 
-                    //// Doble check.
-                    //if (!listening)
-                    //{
-                    // Code to run on the main thread
                     listening = true;
 
                     speechRecognizer.StartListening(intent);
-                    //}
                 }
             });
         }
@@ -321,10 +313,32 @@ namespace Fiuba7539.Droid
             }
             else
             {
-                await Speak($"Comando recibido: '{command}'", WaitForCommand);
+                var availableCommands = GetAvailableCommands().Select(p => p.Trim().ToLower()).ToArray();
+
+                if (command == Commands.Command ||
+                    command == Commands.Help)
+                {
+                    var list = availableCommands.ToList();
+                    list.Add(Commands.Exit);
+
+                    //await Speak($"Los comandos que entiendo son: '{string.Join("', '", list)}'", WaitForCommand);
+                    await Speak($"Los comandos que entiendo son: {string.Join("; ", list)}.", WaitForCommand);
+                }
+                else if (availableCommands.Contains(command))
+                {
+                    ExecuteCommand(command);
+                }
+                else
+                {
+                    await Speak($"No conozco el comando: {command}", WaitForCommand);
+                }
             }
         }
 
+        protected abstract void ExecuteCommand(string command);
+
+        protected abstract IEnumerable<string> GetAvailableCommands();
+        
         protected override void OnDestroy()
         {
             UnmuteMic();

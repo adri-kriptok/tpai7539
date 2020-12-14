@@ -14,6 +14,12 @@ namespace Fiuba7539.Droid.Base
 {
     public static class Commands
     {
-        public static string Exit = "salir";
+        public const string Exit = "salir";
+
+        public const string Command = "comandos";
+        public const string Help = "ayuda";
+
+        public const string Search = "buscar";
+        public const string Back = "volver";
     }
 }
