@@ -23,10 +23,16 @@ using Xamarin.Essentials;
 
 namespace Fiuba7539.Droid.Activities
 {
+    /// <summary>
+    /// https://abhiandroid.com/ui/searchview
+    /// </summary>
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
-    public class SearchActivity : ActivityBase, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class SearchActivity : AppCompatActivity, 
+        BottomNavigationView.IOnNavigationItemSelectedListener,
+        SearchView.IOnQueryTextListener
     {
-        TextView textMessage;
+        private SearchView editsearch;
+        private ListView list;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -34,10 +40,18 @@ namespace Fiuba7539.Droid.Activities
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_search);
 
-            textMessage = FindViewById<TextView>(Resource.Id.message);
-            BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
-            navigation.SetOnNavigationItemSelectedListener(this);
+            // Locate the EditText in listview_main.xml
+            editsearch = FindViewById<SearchView>(Resource.Id.search);
+            editsearch.SetOnQueryTextListener(this);
+
+            list = FindViewById<ListView>(Resource.Id.listview);
+
+
+            // // Pass results to ListViewAdapter Class
+            //adapter = new ArrayAdapter(this, arraylist);
+
         }
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -47,8 +61,6 @@ namespace Fiuba7539.Droid.Activities
 
         public bool OnNavigationItemSelected(IMenuItem item)
         {
-            textMessage.SetText(Resource.String.title_search);
-
             return false;
         }
 
@@ -57,99 +69,19 @@ namespace Fiuba7539.Droid.Activities
             base.OnActionModeStarted(mode);
         }
 
-        protected async override void OnPostCreate(Bundle savedInstanceState)
+        public bool OnQueryTextChange(string newText)
         {
-            base.OnPostCreate(savedInstanceState);
-
-            await Speak("Este es el buscador. Qué quieres buscar?", () =>
-            {
-                WaitForCommand();
-            });
+            return false;
         }
 
-        protected override IEnumerable<string> GetAvailableCommands()
+        public bool OnQueryTextSubmit(string query)
         {
-            yield return Commands.Back;
-        }
+            // string text = newText;
+            // adapter.filter(text);
 
-        protected override void ExecuteCommand(string command)
-        {
-            if (command == Commands.Back)
-            {
-                Finish();
-            }
-        }
+            // list.SetAdapter()
 
-        protected async override Task OnNotKnownCommand(string search)
-        {
-            await Speak($"Buscando: '{search}'", () =>
-            {
-                Search(search);
-            });
-        }
-
-        private async void Search(string search)
-        {
-            var responseJson = GetSearchJson(search);
-
-            var parsed = JsonHelper.Parse<SearchProcessItemModel[]>(responseJson);
-
-            if (parsed.Length > 0)
-            {
-                await Speak($"Encontré: {StringHelper.Join(parsed.Select(p => p.Name))}.", () =>
-                {
-                    WaitForCommand();
-                });
-            }
-            else
-            {
-                await Speak($"No encontré procesos relacionados con: {search}. Intenta otra vez.", () =>
-                {
-                    WaitForCommand();
-                });
-            }
-        }
-
-        private async void WaitForSelection()
-        {
-            await Speak($"Cual quieres hacer?", () =>
-            {
-                WaitForCommand();
-            });
-        }
-
-        private static string GetSearchJson(string search)
-        {
-            var response = string.Empty;
-
-            search = URLEncoder.Encode(search);
-
-            var url = new URL($"http://www.prismasoft.com.ar/demos/Fiuba7539/api/svc/search?text={search}");
-            var conn = (HttpURLConnection)url.OpenConnection();
-
-
-            var authData = string.Format("{0}:{1}", "adrian@prismasoft.com.ar", "asdasd");
-            var authHeaderValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(authData));
-
-            conn.AddRequestProperty("Authorization", $"Basic {authHeaderValue}");
-
-            conn.RequestMethod = "POST";
-
-            if (conn.ResponseCode == HttpStatus.Ok)
-            {
-                var reader = new BufferedReader(new InputStreamReader(conn.InputStream));
-                var line = reader.ReadLine();
-
-                while (line != null)
-                {
-                    response += line;
-                    line = reader.ReadLine();
-                }
-
-                reader.Close();
-            }
-            conn.Disconnect();
-            return response;
+            return false;
         }
     }
 }

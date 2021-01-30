@@ -17,18 +17,20 @@ using Xamarin.Essentials;
 namespace Fiuba7539.Droid
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    public class MainActivity : AppCompatActivity, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : ActivityBase, BottomNavigationView.IOnNavigationItemSelectedListener
     {
+        private TextView textMessage;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
-            
-             var navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
-             navigation.SetOnNavigationItemSelectedListener(this);            
-        }
 
+            textMessage = FindViewById<TextView>(Resource.Id.message);
+            BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
+            navigation.SetOnNavigationItemSelectedListener(this);
+        }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -36,9 +38,36 @@ namespace Fiuba7539.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
+        public bool OnNavigationItemSelected(IMenuItem item)
+        {
+            textMessage.SetText(Resource.String.title_home);
+
+            return false;
+        }
+
         public override void OnActionModeStarted(ActionMode mode)
         {
             base.OnActionModeStarted(mode);
+        }
+
+        protected async override void OnPostCreate(Bundle savedInstanceState)
+        {
+            base.OnPostCreate(savedInstanceState);
+
+            await Speak("Bienvenido! \n\n Háblame y empecemos a hacer cosas juntos!", () =>
+            {
+                WaitForCommand();
+            });
+        }
+
+        protected async override void OnRestart()
+        {
+            base.OnRestart();
+
+            await Speak("Que quieres hacer?", () =>
+            {
+                WaitForCommand();
+            });            
         }
 
         protected override void OnDestroy()
@@ -48,18 +77,14 @@ namespace Fiuba7539.Droid
             JavaSystem.Exit(0);
         }
 
-        public bool OnNavigationItemSelected(IMenuItem item)
+        protected override IEnumerable<string> GetAvailableCommands()
         {
-            if (item.ItemId == Resource.Id.navigation_search)
-            {
-                StartActivity(typeof(SearchActivity));
-            }
+            yield return Commands.Search;
+        }
 
-            
-            //DrawerLayout drawer = (DrawerLayout)findViewById(R.id.drawer_layout);
-            //drawer.closeDrawer(GravityCompat.START);
-
-            return false;
+        protected override void ExecuteCommand(string command)
+        {
+            StartActivity(typeof(SearchActivity));
         }
     }
 }
