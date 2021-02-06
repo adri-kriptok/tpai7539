@@ -10,6 +10,7 @@ using Android.Views;
 using Android.Widget;
 using Fiuba.App7539.Helpers;
 using Fiuba7539.Droid.Base;
+using Fiuba7539.Droid.Helpers;
 using Fiuba7539.Droid.Models;
 using Java.IO;
 using Java.Lang;
@@ -32,7 +33,10 @@ namespace Fiuba7539.Droid.Activities
         SearchView.IOnQueryTextListener
     {
         private SearchView editsearch;
-        private ListView list;
+        private ListView listView;
+
+        private IList<SearchProcessItemModel> searchResults = new List<SearchProcessItemModel>();
+        private ArrayAdapter<string> adapter;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -44,12 +48,16 @@ namespace Fiuba7539.Droid.Activities
             editsearch = FindViewById<SearchView>(Resource.Id.search);
             editsearch.SetOnQueryTextListener(this);
 
-            list = FindViewById<ListView>(Resource.Id.listview);
+            listView = FindViewById<ListView>(Resource.Id.listview);
 
+            // Pass results to ListViewAdapter Class
+            adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, new string[] 
+            {
+                "Hola",
+                "Chau"
+            });
 
-            // // Pass results to ListViewAdapter Class
-            //adapter = new ArrayAdapter(this, arraylist);
-
+            listView.SetAdapter(adapter);
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -75,11 +83,30 @@ namespace Fiuba7539.Droid.Activities
         }
 
         public bool OnQueryTextSubmit(string query)
-        {
+        {            
+            // Esto es para que me permita ejecutarlo sincrónicamente.
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().PermitAll().Build();
+            StrictMode.SetThreadPolicy(policy);
+
+            var search = URLEncoder.Encode(query);
+            var response = RestHelper.Post<SearchProcessItemModel[]>($"api/svc/search?text={search}");
+
             // string text = newText;
             // adapter.filter(text);
 
-            // list.SetAdapter()
+            //adapter.Clear();
+            // adapter.AddAll((System.Collections.ICollection)response.Select(p =>
+            // {
+            //     return p.Name;
+            // }).ToArray());
+
+            // Pass results to ListViewAdapter Class
+            adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, response.Select(p =>
+            {
+                return p.Name;
+            }).ToArray());
+
+            listView.SetAdapter(adapter);
 
             return false;
         }
