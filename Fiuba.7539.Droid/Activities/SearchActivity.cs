@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
 using Android.Speech;
@@ -17,6 +18,7 @@ using Java.Lang;
 using Java.Net;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,12 +32,13 @@ namespace Fiuba7539.Droid.Activities
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
     public class SearchActivity : AppCompatActivity, 
         BottomNavigationView.IOnNavigationItemSelectedListener,
-        SearchView.IOnQueryTextListener
+        SearchView.IOnQueryTextListener,
+        ListView.IOnItemClickListener
     {
         private SearchView editsearch;
         private ListView listView;
 
-        private IList<SearchProcessItemModel> searchResults = new List<SearchProcessItemModel>();
+        private IDictionary<string, string> searchResults = null;
         private ArrayAdapter<string> adapter;
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -49,14 +52,18 @@ namespace Fiuba7539.Droid.Activities
             editsearch.SetOnQueryTextListener(this);
 
             listView = FindViewById<ListView>(Resource.Id.listview);
+            listView.OnItemClickListener = this;
+            
+            SetValues(new Dictionary<string, string>());
+        }
+
+        private void SetValues(IDictionary<string, string> results)
+        {
+            this.searchResults = results;
 
             // Pass results to ListViewAdapter Class
-            adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, new string[] 
-            {
-                "Hola",
-                "Chau"
-            });
-
+            adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, results.Values.ToArray());
+            
             listView.SetAdapter(adapter);
         }
 
@@ -91,24 +98,18 @@ namespace Fiuba7539.Droid.Activities
             var search = URLEncoder.Encode(query);
             var response = RestHelper.Post<SearchProcessItemModel[]>($"api/svc/search?text={search}");
 
-            // string text = newText;
-            // adapter.filter(text);
-
-            //adapter.Clear();
-            // adapter.AddAll((System.Collections.ICollection)response.Select(p =>
-            // {
-            //     return p.Name;
-            // }).ToArray());
-
-            // Pass results to ListViewAdapter Class
-            adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, response.Select(p =>
-            {
-                return p.Name;
-            }).ToArray());
-
-            listView.SetAdapter(adapter);
+            SetValues(response.ToDictionary(p => p.Id, p => p.Name));
 
             return false;
+        }
+
+        public void OnItemClick(AdapterView parent, View view, int position, long id)
+        {
+            var activity = new Intent(this, typeof(ProcessActivity));
+
+            activity.PutExtra("Id", searchResults.ToArray()[id].Key);
+
+            StartActivity(activity);
         }
     }
 }

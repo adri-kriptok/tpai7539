@@ -65,6 +65,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activities\ProcessActivity.cs" />
     <Compile Include="Activities\SearchActivity.cs" />
     <Compile Include="Base\ActivityBase.cs" />
     <Compile Include="Base\Commands.cs" />
@@ -129,6 +130,15 @@
       <Project>{9ed8e765-01d7-4e44-be97-7aeedb66b500}</Project>
       <Name>Fiuba.App7539</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\activity_process.xml">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\myButton.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
