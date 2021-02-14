@@ -60,11 +60,12 @@ namespace Fiuba7539.Droid.Activities
         private void SetValues(IDictionary<string, string> results)
         {
             this.searchResults = results;
-
+           
             // Pass results to ListViewAdapter Class
-            adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, results.Values.ToArray());
-            
-            listView.SetAdapter(adapter);
+            adapter = new ArrayAdapter<string>(this, Resource.Drawable.items, results.Values.ToArray());
+            //adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, results.Values.ToArray());
+
+            listView.Adapter = adapter;
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

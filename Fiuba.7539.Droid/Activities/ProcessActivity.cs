@@ -49,9 +49,9 @@ namespace Fiuba7539.Droid.Activities
             var message = FindViewById<TextView>(Resource.Id.message);
             message.SetText(process.Name, TextView.BufferType.Normal);
 
-            Button button1 = FindViewById<Button>(Resource.Id.button1);
-            GradientDrawable bgDrawable = (GradientDrawable)button1.Background;
-            bgDrawable.SetColor(Color.CornflowerBlue.ToInt());
+            // Button button1 = FindViewById<Button>(Resource.Id.button1);
+            // GradientDrawable bgDrawable = (GradientDrawable)button1.Background;
+            // bgDrawable.SetColor(Color.CornflowerBlue.ToInt());
         }
     }
 }
