@@ -17,7 +17,7 @@ using Xamarin.Essentials;
 namespace Fiuba7539.Droid
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    public class MainActivity : AppCompatActivity, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : ActivityBase, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -60,6 +60,29 @@ namespace Fiuba7539.Droid
             //drawer.closeDrawer(GravityCompat.START);
 
             return false;
+        }
+
+        protected override async void OnPostCreate(Bundle savedInstanceState)
+        {
+            base.OnPostCreate(savedInstanceState);
+
+            await Speak($"Bienvenido!", () =>
+            {
+                WaitForCommand();
+            });
+        }
+
+        protected override void ExecuteCommand(string command)
+        {
+            if (command == Commands.Search)
+            {
+                StartActivity(typeof(SearchActivity));
+            }
+        }
+
+        protected override IEnumerable<string> GetAvailableCommands()
+        {
+            yield return Commands.Search;
         }
     }
 }

@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
+using static Android.Views.View;
 
 namespace Fiuba7539.Droid.Activities
 {
@@ -31,9 +32,13 @@ namespace Fiuba7539.Droid.Activities
     /// https://abhiandroid.com/ui/searchview
     /// </summary>
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
-    public class ProcessActivity : AppCompatActivity
+    public class ProcessActivity : AppCompatActivity, IOnClickListener
     {
         private ProcessModel process;
+        private ListView listView;
+        private ArrayAdapter<string> adapter;
+        private Button button;
+
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -42,16 +47,52 @@ namespace Fiuba7539.Droid.Activities
             SetContentView(Resource.Layout.activity_process);
             
             // Tomo el Id enviado por parámetro.
-            string id = Intent.GetStringExtra("Id") ?? string.Empty;
+            string id = Intent.GetStringExtra("Id") ?? string.Empty;            
 
-            this.process = RestHelper.Post<ProcessModel>($"api/svc/process?id={id}");
+            // Parceo el proceso.
+            process = RestHelper.Post<ProcessModel>($"api/svc/process?id={id}");
+
+            // Reenumero los pasos según orden.
+            process.Items = process.Items.OrderBy(p => p.Order).ToArray();
+            for (int i = 0; i < process.Items.Length; i++)
+            {
+                process.Items[i].Order = i + 1;
+            }
             
             var message = FindViewById<TextView>(Resource.Id.message);
             message.SetText(process.Name, TextView.BufferType.Normal);
 
-            // Button button1 = FindViewById<Button>(Resource.Id.button1);
-            // GradientDrawable bgDrawable = (GradientDrawable)button1.Background;
-            // bgDrawable.SetColor(Color.CornflowerBlue.ToInt());
+            listView = FindViewById<ListView>(Resource.Id.listview);
+
+            var array = process.Requirements.Select(p => p.Name).ToArray();
+
+            for (int i = 0; i < array.Length; i++)
+            {                
+                array[i] = $"{i + 1}. {array[i]}";
+            }
+
+            //  Cargo la lista de requerimientos.
+            adapter = new ArrayAdapter<string>(this, Resource.Drawable.items, array);            
+            listView.Adapter = adapter;
+
+            button = FindViewById<Button>(Resource.Id.button1);
+            button.SetOnClickListener(this);
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+
+            button.Clickable = true;
+        }
+
+        public void OnClick(View v)
+        {
+            button.Clickable = false;
+
+            var activity = new Intent(this, typeof(ProcessStepActivity));
+            activity.PutExtra("items", JsonHelper.Serialize(process.Items));
+            StartActivity(activity);
         }
     }
 }

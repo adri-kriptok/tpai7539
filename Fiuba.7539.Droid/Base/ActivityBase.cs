@@ -62,11 +62,11 @@ namespace Fiuba7539.Droid
 
         private void MuteMicSound()
         {
-            Debugger.Log(1, "DEBUG", "Mute");
-
-            UpdateMicSound();
-            // Muteo para que no se escuche el ruido molesto de que se activa el micrófono.
-            audioManager.SetStreamVolume(Stream.Notification, 0, 0);
+            // Debugger.Log(1, "DEBUG", "Mute");
+            // 
+            // UpdateMicSound();
+            // // Muteo para que no se escuche el ruido molesto de que se activa el micrófono.
+            // audioManager.SetStreamVolume(Stream.Notification, 0, 0);
         }
 
         /// <summary>
@@ -80,12 +80,12 @@ namespace Fiuba7539.Droid
 
         private void UnmuteMic()
         {
-            Debugger.Log(1, "DEBUG", "Unmute");
-
-            // this methods called when Speech Recognition is ready
-            // also this is the right time to un-mute system volume because the annoying sound played already
-            // again setting the system volume back to the original, un-mutting
-            audioManager.SetStreamVolume(Stream.Notification, currentStreamVolume, 0);
+            // Debugger.Log(1, "DEBUG", "Unmute");
+            // 
+            // // this methods called when Speech Recognition is ready
+            // // also this is the right time to un-mute system volume because the annoying sound played already
+            // // again setting the system volume back to the original, un-mutting
+            // audioManager.SetStreamVolume(Stream.Notification, currentStreamVolume, 0);
         }
 
         private void MSpeechRecognizer_ReadyForSpeech(object sender, ReadyForSpeechEventArgs e)
@@ -147,10 +147,8 @@ namespace Fiuba7539.Droid
             }
         }
 
-        protected async override void OnPostCreate(Bundle savedInstanceState)
+        private async Task LoadSettings()
         {
-            base.OnPostCreate(savedInstanceState);
-
             var locales = await TextToSpeech.GetLocalesAsync();
 
 #if DEBUG
@@ -175,6 +173,11 @@ namespace Fiuba7539.Droid
         {            
             Debugger.Log(1, "DEBUG", message);
             StopRecognition();
+
+            if (speakSettings == null)
+            {
+                await LoadSettings();
+            }
 
             //UnmuteMic();
             await TextToSpeech.SpeakAsync(message, speakSettings).ContinueWith(t =>
@@ -315,13 +318,13 @@ namespace Fiuba7539.Droid
             else
             {
                 var availableCommands = GetAvailableCommands().Select(p => p.Trim().ToLower()).ToArray();
-
+            
                 if (command == Commands.Command ||
                     command == Commands.Help)
                 {
                     var list = availableCommands.ToList();
                     list.Add(Commands.Exit);
-
+            
                     //await Speak($"Los comandos que entiendo son: '{string.Join("', '", list)}'", WaitForCommand);
                     await Speak($"Los comandos que entiendo son: {StringHelper.Join(list)}.", WaitForCommand);
                 }
