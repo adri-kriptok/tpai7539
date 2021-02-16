@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
@@ -29,8 +30,8 @@ namespace Fiuba7539.Droid.Activities
     /// <summary>
     /// https://abhiandroid.com/ui/searchview
     /// </summary>
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
-    public class SearchActivity : AppCompatActivity, 
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", ScreenOrientation = ScreenOrientation.Portrait)]
+    public class SearchActivity : ActivityBase, 
         BottomNavigationView.IOnNavigationItemSelectedListener,
         SearchView.IOnQueryTextListener,
         ListView.IOnItemClickListener
@@ -55,6 +56,16 @@ namespace Fiuba7539.Droid.Activities
             listView.OnItemClickListener = this;
             
             SetValues(new Dictionary<string, string>());
+        }
+
+        protected override async void OnPostResume()
+        {
+            base.OnPostResume();
+
+            await Speak("¿Qué buscamos?", () =>
+            {
+                WaitForCommand();
+            });
         }
 
         private void SetValues(IDictionary<string, string> results)
@@ -111,6 +122,25 @@ namespace Fiuba7539.Droid.Activities
             activity.PutExtra("Id", searchResults.ToArray()[id].Key);
 
             StartActivity(activity);
+        }
+
+        protected override void ExecuteCommand(string command)
+        {
+            if (command == Commands.Back)
+            {
+                StopListening();
+                Finish();
+            }
+        }
+
+        protected override IEnumerable<string> GetAvailableCommands()
+        {            
+            yield return Commands.Back;
+        }
+
+        protected async override Task OnNotKnownCommand(string search)
+        {
+            editsearch.SetQuery(search, true);
         }
     }
 }

@@ -24,13 +24,16 @@ namespace Fiuba7539.Droid.Helpers
             return JsonHelper.Parse<T>(Post(url));
         }
         
-        private static string Post(string url)
-        {
-            //search = URLEncoder.Encode(search);
-            
+        public static string Post(string url)
+        {            
             var response = string.Empty;
 
-            var url3 = new URL($"{urlBase}/{url}");
+            if (!url.ToLower().StartsWith("http"))
+            {
+                url = $"{urlBase}/{url}";
+            }
+
+            var url3 = new URL(url);
             var conn = (HttpURLConnection)url3.OpenConnection();
 
             var authData = string.Format("{0}:{1}", "adrian@prismasoft.com.ar", "asdasd");

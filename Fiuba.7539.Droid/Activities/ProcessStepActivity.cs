@@ -1,5 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Content.PM;
+using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
@@ -30,7 +32,7 @@ namespace Fiuba7539.Droid.Activities
     /// <summary>
     /// https://abhiandroid.com/ui/searchview
     /// </summary>
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", ScreenOrientation = ScreenOrientation.Portrait)]
     public class ProcessStepActivity : ActivityBase
     {
         private ItemModel current;
@@ -54,16 +56,30 @@ namespace Fiuba7539.Droid.Activities
 
             FindViewById<TextView>(Resource.Id.message2)
                 .SetText(current.Description, TextView.BufferType.Normal);
+
+            if (current.Image != null)
+            {
+                var data = RestHelper.Post(current.Image);
+                byte[] imageAsBytes = Base64.Decode(data, Base64Flags.Default);
+                var bmp = BitmapFactory.DecodeByteArray(imageAsBytes, 0, imageAsBytes.Length);
+
+                var img = FindViewById<ImageView>(Resource.Id.imageView1);                
+                img.SetImageBitmap(bmp);
+
+                
+                // img.Alpha = 0.5f;
+                // img.BringToFront();
+                // img.Enabled = true;
+                
+            }
         }
 
         private bool LastStep => next.Count() == 0;
 
-        protected override async void OnPostCreate(Bundle savedInstanceState)
+        private async Task Speak()
         {
-            base.OnPostCreate(savedInstanceState);
-
             var text = $"Paso {current.Order}. ";
-            
+
             if (LastStep)
             {
                 text += "Y último.";
@@ -73,6 +89,13 @@ namespace Fiuba7539.Droid.Activities
             {
                 WaitForCommand();
             });
+        }
+
+        protected override async void OnPostResume()
+        {
+            base.OnPostResume();
+
+            await Speak();
         }
 
         protected override void ExecuteCommand(string command)
@@ -87,11 +110,18 @@ namespace Fiuba7539.Droid.Activities
                     StartActivity(activity);
                 }
             }
+            else if (command == Commands.Back 
+                || command == Commands.Previews)
+            {
+                StopListening();
+                Finish();
+            }
         }
 
         protected override IEnumerable<string> GetAvailableCommands()
         {
             yield return Commands.Back;
+            yield return Commands.Previews;
             yield return Commands.Next;
             yield return Commands.Ready;
         }

@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
@@ -31,8 +32,8 @@ namespace Fiuba7539.Droid.Activities
     /// <summary>
     /// https://abhiandroid.com/ui/searchview
     /// </summary>
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
-    public class ProcessActivity : AppCompatActivity, IOnClickListener
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", ScreenOrientation = ScreenOrientation.Portrait)]
+    public class ProcessActivity : ActivityBase, IOnClickListener
     {
         private ProcessModel process;
         private ListView listView;
@@ -40,7 +41,7 @@ namespace Fiuba7539.Droid.Activities
         private Button button;
 
 
-        protected override void OnCreate(Bundle savedInstanceState)
+        protected override async void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
@@ -77,6 +78,8 @@ namespace Fiuba7539.Droid.Activities
 
             button = FindViewById<Button>(Resource.Id.button1);
             button.SetOnClickListener(this);
+
+            await Speak(process.Name, () => WaitForCommand());
         }
 
         protected override void OnStart()
@@ -90,9 +93,31 @@ namespace Fiuba7539.Droid.Activities
         {
             button.Clickable = false;
 
+            Start();
+        }
+
+        private void Start()
+        {
+            StopListening();
+
             var activity = new Intent(this, typeof(ProcessStepActivity));
             activity.PutExtra("items", JsonHelper.Serialize(process.Items));
             StartActivity(activity);
+        }
+
+        protected override void ExecuteCommand(string command)
+        {
+            if (command == Commands.Initialize ||
+                command == Commands.Start)
+            {
+                Start();
+            }
+        }
+
+        protected override IEnumerable<string> GetAvailableCommands()
+        {
+            yield return Commands.Start;
+            yield return Commands.Initialize;
         }
     }
 }

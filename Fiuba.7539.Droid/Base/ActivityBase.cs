@@ -60,6 +60,15 @@ namespace Fiuba7539.Droid
             MuteMicSound();
         }
 
+        /// <summary>
+        /// Indica que debe dejar de escuchar.
+        /// Probablemente porque ya se ejecutó una acción y no fue por comando de voz.
+        /// </summary>
+        internal void StopListening()
+        {
+            speechRecognizer.StopListening();
+        }
+
         private void MuteMicSound()
         {
             // Debugger.Log(1, "DEBUG", "Mute");
@@ -214,8 +223,8 @@ namespace Fiuba7539.Droid
                     intent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
 
                     // end capturing speech if there is 3 seconds of silence  
-                    intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 3000);
-                    intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 3000);
+                    intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 30000);
+                    intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 30000);
                     intent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 30000);
                     intent.PutExtra(RecognizerIntent.ExtraMaxResults, 1);
 

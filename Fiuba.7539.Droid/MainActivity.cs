@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using Android.Speech;
@@ -16,7 +17,7 @@ using Xamarin.Essentials;
 
 namespace Fiuba7539.Droid
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true, ScreenOrientation = ScreenOrientation.Portrait)]
     public class MainActivity : ActivityBase, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         protected override void OnCreate(Bundle savedInstanceState)
@@ -52,12 +53,9 @@ namespace Fiuba7539.Droid
         {
             if (item.ItemId == Resource.Id.navigation_search)
             {
+                StopListening();
                 StartActivity(typeof(SearchActivity));
             }
-
-            
-            //DrawerLayout drawer = (DrawerLayout)findViewById(R.id.drawer_layout);
-            //drawer.closeDrawer(GravityCompat.START);
 
             return false;
         }
