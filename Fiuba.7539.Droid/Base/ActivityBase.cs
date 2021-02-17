@@ -179,7 +179,7 @@ namespace Fiuba7539.Droid
         }
 
         protected async Task Speak(string message, Action afterFinished)
-        {
+        {            
             Debugger.Log(1, "DEBUG", message);
             StopRecognition();
 

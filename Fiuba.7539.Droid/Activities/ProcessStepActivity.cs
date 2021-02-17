@@ -27,13 +27,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using static Android.Views.View;
+using static Android.Widget.TextView;
 
 namespace Fiuba7539.Droid.Activities
 {
     /// <summary>
     /// https://abhiandroid.com/ui/searchview
     /// </summary>
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", ScreenOrientation = ScreenOrientation.Portrait)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", 
+        ScreenOrientation = ScreenOrientation.Portrait)]
     public class ProcessStepActivity : ActivityBase, IOnClickListener
     {
         private ItemModel current;
@@ -60,8 +62,13 @@ namespace Fiuba7539.Droid.Activities
                 FindViewById<TextView>(Resource.Id.message2)
                     .SetText(current.Description, TextView.BufferType.Normal);
 
-                FindViewById<Button>(Resource.Id.buttonNext).SetOnClickListener(this);
-                // FindViewById<Button>(Resource.Id.buttonBack).SetOnClickListener(this);
+                var nextButton = FindViewById<Button>(Resource.Id.buttonNext);
+                nextButton.SetOnClickListener(this);
+
+                if (LastStep)
+                {
+                    nextButton.SetText("VOLVER", BufferType.Normal);
+                }
 
                 if (current.Image != null)
                 {
@@ -123,8 +130,10 @@ namespace Fiuba7539.Droid.Activities
         }
 
         private void BackToMain()
-        {            
-            SetResult(Result.Canceled);
+        {
+            var intents = new Intent(ApplicationContext, typeof(MainActivity));
+            intents.AddFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
+            StartActivity(intents);
             Finish();
         }
 
