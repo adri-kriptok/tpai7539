@@ -14,11 +14,12 @@ using Java.Lang;
 using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Essentials;
+using static Android.Views.View;
 
 namespace Fiuba7539.Droid
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true, ScreenOrientation = ScreenOrientation.Portrait)]
-    public class MainActivity : ActivityBase, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : ActivityBase, IOnClickListener
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -26,8 +27,8 @@ namespace Fiuba7539.Droid
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
             
-             var navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
-             navigation.SetOnNavigationItemSelectedListener(this);            
+             var navigation = FindViewById<Button>(Resource.Id.buttonSearch);
+             navigation.SetOnClickListener(this);            
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -47,17 +48,6 @@ namespace Fiuba7539.Droid
             base.OnDestroy();
 
             JavaSystem.Exit(0);
-        }
-
-        public bool OnNavigationItemSelected(IMenuItem item)
-        {
-            if (item.ItemId == Resource.Id.navigation_search)
-            {
-                StopListening();
-                StartActivity(typeof(SearchActivity));
-            }
-
-            return false;
         }
 
         protected override async void OnPostCreate(Bundle savedInstanceState)
@@ -81,6 +71,15 @@ namespace Fiuba7539.Droid
         protected override IEnumerable<string> GetAvailableCommands()
         {
             yield return Commands.Search;
+        }
+
+        public void OnClick(View v)
+        {
+            if (v.Id == Resource.Id.buttonSearch)
+            {
+                StopListening();
+                StartActivity(typeof(SearchActivity));
+            }            
         }
     }
 }

@@ -62,10 +62,7 @@ namespace Fiuba7539.Droid.Activities
         {
             base.OnPostResume();
 
-            await Speak("¿Qué buscamos?", () =>
-            {
-                WaitForCommand();
-            });
+            await Speak("¿Qué buscamos?", () => WaitForCommand());
         }
 
         private void SetValues(IDictionary<string, string> results)
@@ -73,9 +70,7 @@ namespace Fiuba7539.Droid.Activities
             this.searchResults = results;
            
             // Pass results to ListViewAdapter Class
-            adapter = new ArrayAdapter<string>(this, Resource.Drawable.items, results.Values.ToArray());
-            //adapter = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, results.Values.ToArray());
-
+            adapter = new ArrayAdapter<string>(this, Resource.Drawable.items, results.Values.ToArray());            
             listView.Adapter = adapter;
         }
 
