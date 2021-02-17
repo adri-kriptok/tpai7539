@@ -17,7 +17,7 @@ namespace Fiuba7539.Droid.Helpers
 {
     public class RestHelper
     {
-        private const string urlBase = "http://www.prismasoft.com.ar/demos/Fiuba7539";
+        private const string urlBase = "http://www.prismasoft.com.ar/demos/Fiuba7539_2";
 
         public static T Post<T>(string url)
         {
@@ -35,11 +35,6 @@ namespace Fiuba7539.Droid.Helpers
 
             var url3 = new URL(url);
             var conn = (HttpURLConnection)url3.OpenConnection();
-
-            var authData = string.Format("{0}:{1}", "adrian@prismasoft.com.ar", "asdasd");
-            var authHeaderValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(authData));
-
-            conn.AddRequestProperty("Authorization", $"Basic {authHeaderValue}");
 
             conn.RequestMethod = "POST";
 

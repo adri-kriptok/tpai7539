@@ -67,7 +67,7 @@ namespace Fiuba7539.Droid.Activities
 
                 if (LastStep)
                 {
-                    nextButton.SetText("VOLVER", BufferType.Normal);
+                    nextButton.SetText("LISTO", BufferType.Normal);
                 }
 
                 if (current.Image != null)
@@ -87,7 +87,11 @@ namespace Fiuba7539.Droid.Activities
         protected override async void OnPostResume()
         {
             base.OnPostResume();
+            await Repeat();
+        }
 
+        private async Task Repeat()
+        {
             var text = $"Paso {current.Order}. ";
 
             if (LastStep)
@@ -98,23 +102,33 @@ namespace Fiuba7539.Droid.Activities
             await Speak($"{text} {current.Name}. \n\n {current.Description}", () => WaitForCommand());
         }
 
-        protected override void ExecuteCommand(string command)
+        protected override async void ExecuteCommand(string command)
         {
             if (command == Commands.Next ||
-                command == Commands.Ready)
+                command == Commands.Ready ||
+                command == Commands.Foward)
             {
                 NextStep();
             }
             else if (command == Commands.Back 
-                || command == Commands.Previews)
+                || command == Commands.Previews
+                || command == Commands.Backward)
             {
+                ShutUp();
                 StopListening();
                 Finish();
+            }
+            else if (command == Commands.Repeat)
+            {
+                await Repeat();
             }
         }
 
         private void NextStep()
         {
+            ShutUp();
+            StopListening();
+
             // Si es el último paso.
             if (LastStep)
             {
@@ -143,12 +157,15 @@ namespace Fiuba7539.Droid.Activities
             yield return Commands.Previews;
             yield return Commands.Next;
             yield return Commands.Ready;
+            yield return Commands.Repeat;
+            yield return Commands.Foward;
+            yield return Commands.Backward;
         }
 
         public void OnClick(View v)
         {            
             if (v.Id == Resource.Id.buttonNext)
-            {
+            {                
                 NextStep();
             }
         }

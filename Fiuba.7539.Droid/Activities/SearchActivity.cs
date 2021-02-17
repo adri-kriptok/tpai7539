@@ -62,6 +62,7 @@ namespace Fiuba7539.Droid.Activities
         {
             base.OnPostResume();
 
+            Search(string.Empty);
             await Speak("¿Qué buscamos?", () => WaitForCommand());
         }
 
@@ -97,17 +98,21 @@ namespace Fiuba7539.Droid.Activities
         }
 
         public bool OnQueryTextSubmit(string query)
+        {
+            Search(URLEncoder.Encode(query));
+
+            return false;
+        }
+
+        private void Search(string search)
         {            
             // Esto es para que me permita ejecutarlo sincrónicamente.
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().PermitAll().Build();
             StrictMode.SetThreadPolicy(policy);
 
-            var search = URLEncoder.Encode(query);
             var response = RestHelper.Post<SearchProcessItemModel[]>($"api/svc/search?text={search}");
 
             SetValues(response.ToDictionary(p => p.Id, p => p.Name));
-
-            return false;
         }
 
         public void OnItemClick(AdapterView parent, View view, int position, long id)
@@ -116,6 +121,8 @@ namespace Fiuba7539.Droid.Activities
 
             activity.PutExtra("Id", searchResults.ToArray()[id].Key);
 
+            ShutUp();
+            StopListening();
             StartActivity(activity);
         }
 
@@ -123,6 +130,7 @@ namespace Fiuba7539.Droid.Activities
         {
             if (command == Commands.Back)
             {
+                ShutUp();
                 StopListening();
                 Finish();
             }

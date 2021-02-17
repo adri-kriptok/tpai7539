@@ -33,6 +33,7 @@ namespace Fiuba7539.Droid
         private SpeechRecognizer speechRecognizer;
         private AudioManager audioManager;
         private int currentStreamVolume;
+        private CancellationTokenSource cancelToken;
 
         //private Intent voiceIntent;
 
@@ -66,7 +67,9 @@ namespace Fiuba7539.Droid
         /// </summary>
         internal void StopListening()
         {
+            StopRecognition();
             speechRecognizer.StopListening();
+            speechRecognizer.Cancel();            
         }
 
         private void MuteMicSound()
@@ -144,7 +147,7 @@ namespace Fiuba7539.Droid
 
             if (matches.Count != 0)
             {
-                await ProcessCommand(matches.First().ToLower().Trim());
+                await ProcessCommand(WithoutAccents(matches.First().ToLower().Trim()));
                 //string textInput = mFilterText.Text + matches[0];
 
                 //mFilterText.Text = textInput;
@@ -188,11 +191,18 @@ namespace Fiuba7539.Droid
                 await LoadSettings();
             }
 
+            this.cancelToken = new CancellationTokenSource();
+            var token = cancelToken.Token;
+            
             //UnmuteMic();
-            await TextToSpeech.SpeakAsync(message, speakSettings).ContinueWith(t =>
+            await TextToSpeech.SpeakAsync(message, speakSettings, token).ContinueWith(t =>
             {
-                //MuteMicSound();
-                afterFinished();
+                var cancellation = token.IsCancellationRequested;
+                if (t.Status != TaskStatus.Canceled && !cancellation)
+                {
+                    //MuteMicSound();
+                    afterFinished();
+                }
             });
             
         }
@@ -326,7 +336,8 @@ namespace Fiuba7539.Droid
             }
             else
             {
-                var availableCommands = GetAvailableCommands().Select(p => p.Trim().ToLower()).ToArray();
+                var availableCommands = GetAvailableCommands()
+                    .Select(p => WithoutAccents(p.Trim().ToLower())).ToArray();
             
                 if (command == Commands.Command ||
                     command == Commands.Help)
@@ -361,6 +372,48 @@ namespace Fiuba7539.Droid
         {
             UnmuteMic();
             base.OnDestroy();
+        }
+
+        protected void ShutUp()
+        {
+            if (cancelToken != null)
+            {
+                try
+                {
+                    cancelToken.Cancel();
+                    cancelToken.Dispose();
+                }
+                catch
+                {
+
+                }
+                cancelToken = null;
+            }            
+        }
+
+        public override void OnBackPressed()
+        {
+            base.OnBackPressed();
+
+            ShutUp();
+            StopListening();
+        }
+
+        private static string WithoutAccents(string str)
+        {
+            return str
+                .Replace("á", "a")
+                .Replace("é", "e")
+                .Replace("í", "i")
+                .Replace("ó", "o")
+                .Replace("ú", "u")
+                .Replace("ü", "u")
+                .Replace("Á", "A")
+                .Replace("É", "E")
+                .Replace("Í", "I")
+                .Replace("Ó", "O")
+                .Replace("Ú", "U")
+                .Replace("Ü", "U");
         }
     }
 }

@@ -21,15 +21,16 @@ namespace Fiuba7539.Droid.Base
 
         public const string Search = "buscar";
 
-
+        public const string Repeat = "repetir";
 
         public const string Initialize = "empezar";
         public const string Start = "comenzar";
 
-        public const string Backwars = "atras";
+        public const string Backward = "atras";
         public const string Previews = "anterior";
         public const string Back = "volver";
 
+        public const string Foward = "adelante";
         public const string Next = "siguiente";
         public const string Ready = "listo";
     }

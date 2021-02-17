@@ -98,6 +98,7 @@ namespace Fiuba7539.Droid.Activities
 
         private void Start()
         {
+            ShutUp();
             StopListening();
 
             var activity = new Intent(this, typeof(ProcessStepActivity));

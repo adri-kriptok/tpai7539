@@ -50,21 +50,18 @@ namespace Fiuba7539.Droid
             JavaSystem.Exit(0);
         }
 
-        protected override async void OnPostCreate(Bundle savedInstanceState)
+        protected override async void OnPostResume()
         {
-            base.OnPostCreate(savedInstanceState);
+            base.OnPostResume();
 
-            await Speak($"Bienvenido!", () =>
-            {
-                WaitForCommand();
-            });
+            await Speak($"Bienvenido!", () => WaitForCommand());
         }
 
         protected override void ExecuteCommand(string command)
         {
             if (command == Commands.Search)
             {
-                StartActivity(typeof(SearchActivity));
+                GoToSearch();
             }
         }
 
@@ -77,9 +74,15 @@ namespace Fiuba7539.Droid
         {
             if (v.Id == Resource.Id.buttonSearch)
             {
-                StopListening();
-                StartActivity(typeof(SearchActivity));
-            }            
+                GoToSearch();
+            }
+        }
+
+        private void GoToSearch()
+        {
+            ShutUp();
+            StopListening();
+            StartActivity(typeof(SearchActivity));
         }
     }
 }
