@@ -13,7 +13,6 @@ using Android.Widget;
 using Fiuba.App7539.Helpers;
 using Fiuba.App7539.Models;
 using Fiuba7539.Droid.Base;
-using Fiuba7539.Droid.Helpers;
 using Fiuba7539.Droid.Models;
 using Java.IO;
 using Java.Lang;
@@ -51,7 +50,7 @@ namespace Fiuba7539.Droid.Activities
             string id = Intent.GetStringExtra("Id") ?? string.Empty;            
 
             // Parceo el proceso.
-            process = RestHelper.Post<ProcessModel>($"api/svc/process?id={id}");
+            process = HttpHelper.Post<ProcessModel>($"api/svc/process?id={id}");
 
             // Reenumero los pasos según orden.
             process.Items = process.Items.OrderBy(p => p.Order).ToArray();

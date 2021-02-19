@@ -14,7 +14,6 @@ using Android.Widget;
 using Fiuba.App7539.Helpers;
 using Fiuba.App7539.Models;
 using Fiuba7539.Droid.Base;
-using Fiuba7539.Droid.Helpers;
 using Fiuba7539.Droid.Models;
 using Java.IO;
 using Java.Lang;
@@ -72,7 +71,7 @@ namespace Fiuba7539.Droid.Activities
 
                 if (current.Image != null)
                 {
-                    var data = RestHelper.Post(current.Image);
+                    var data = HttpHelper.Post(current.Image);
                     byte[] imageAsBytes = Base64.Decode(data, Base64Flags.Default);
                     var bmp = BitmapFactory.DecodeByteArray(imageAsBytes, 0, imageAsBytes.Length);
 

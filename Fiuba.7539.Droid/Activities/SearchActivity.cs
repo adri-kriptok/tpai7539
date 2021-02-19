@@ -12,7 +12,6 @@ using Android.Views;
 using Android.Widget;
 using Fiuba.App7539.Helpers;
 using Fiuba7539.Droid.Base;
-using Fiuba7539.Droid.Helpers;
 using Fiuba7539.Droid.Models;
 using Java.IO;
 using Java.Lang;
@@ -110,7 +109,7 @@ namespace Fiuba7539.Droid.Activities
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().PermitAll().Build();
             StrictMode.SetThreadPolicy(policy);
 
-            var response = RestHelper.Post<SearchProcessItemModel[]>($"api/svc/search?text={search}");
+            var response = HttpHelper.Post<SearchProcessItemModel[]>($"api/svc/search?text={search}");
 
             SetValues(response.ToDictionary(p => p.Id, p => p.Name));
         }
