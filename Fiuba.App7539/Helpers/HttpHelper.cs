@@ -7,7 +7,7 @@ namespace Fiuba.App7539.Helpers
 {
     public static class HttpHelper
     {
-        private const string urlBase = "http://www.prismasoft.com.ar/demos/Fiuba7539_2";
+        private const string urlBase = "http://fiuba7539-91186.somee.com/test";                                        
 
         public static T Post<T>(string url)
         {
